@@ -1,0 +1,106 @@
+library(caret)
+
+library(tm)
+
+library(SnowballC)
+
+library(arm)
+
+# Training data.
+
+data <- c('Akun Instagramnya Diblokir Spaso,Eks Striker Timns Indonesia Ini Kebingungan',
+
+'Beli Ekstasi Pakai Bitcoin,Mahasiswa Undip Digelandang BNN Jateng',
+
+'Terlibat TPPU Narkotika,Kepala Rutan Purworejo Dicokok BNN',
+
+
+'Pengeboman di Surabaya : ‘Marah,Sedih, dan Trauma’ Jemaat Gereja',
+
+'Diduga Korban Pembunuhan, Warga Magelang Ditemukan Penuh Luka di Selokan',
+
+'Penjual Hewan Kurban ini Coba Memprediksi Penjualan Tahun ini',
+
+'Curi Motor Matik,Maling Ini Jadi Bahan Tertawaan',
+
+'Video Mengerikan Pencuri Motor Tertabrak Truk dan Mobil',
+
+'Dokter Spesialis Merasa Aneh Setya Novanto Dirawat Dokter Jantung',
+
+'Gadis 15 Tahun Lompat dari Lantai 33 Apartemen Taman Rasuna')
+
+
+
+corpus <- VCorpus(VectorSource(data))
+
+
+
+# Create a document term matrix.
+
+tdm <- DocumentTermMatrix(corpus, list(removePunctuation = TRUE, stopwords = TRUE, stemming = TRUE, removeNumbers = TRUE))
+
+
+
+# Convert to a data.frame for training and assign a classification (factor) to each document.
+
+train <- as.matrix(tdm)
+
+train <- cbind(train, c(0, 1))
+
+colnames(train)[ncol(train)] <- 'y'
+
+train <- as.data.frame(train)
+
+train$y <- as.factor(train$y)
+
+data
+
+train
+
+# Train.
+
+fit <- train(y ~ ., data = train, method = 'bayesglm')
+
+
+
+# Check accuracy on training.
+
+predict(fit, newdata = train)
+
+
+
+# Test data.
+
+data2 <- c('Akun Instagramnya Dihide Spaso,Eks Striker Timns Indonesia Ini Santai',
+
+'Beli Ekstasi Pakai Bitcoin,Mahasiswa Undip Digelandang Aparat TNI',
+
+'TerlibatTPPU Narkotika,Sekretaris Purworejo Dicokok Polisi',
+
+'Pengeboman di Surabaya : ‘Marah,Sedih, dan Trauma’ Jemaat Gereja',
+
+
+'Diduga Korban Begal, Warga Magelang Ditemukan Tewas Penuh Luka di Selokan',
+
+'Penjambretan di Luar Minimarket, Polisi Periksa Sejumlah Saksi',
+'Penjual Hewan Kurban ini Coba Memprediksi Penjualan Tahun lalu',
+
+'Curi Motor Matik,Maling Ini Jadi Amuk Masa Warga',
+
+'Video Mengerikan Pencuri Motor Tertabrak Gerobak Abang Bakso',
+
+
+'Gadis 15 Tahun Tertidur dari Lantai 33 Apartemen Taman Rasuna')
+
+corpus <- VCorpus(VectorSource(data2))
+
+tdm <- DocumentTermMatrix(corpus, control = list(dictionary = Terms(tdm), removePunctuation = TRUE, stopwords = TRUE, stemming = TRUE, removeNumbers = TRUE))
+
+test <- as.matrix(tdm)
+
+
+
+# Check accuracy on test.
+
+predict(fit, newdata = test)
+
